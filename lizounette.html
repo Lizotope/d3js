@@ -36,6 +36,12 @@
                 .domain([0, 5])
                 .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
                 .interpolate(d3.interpolateHcl);
+            
+            color2 = d3.scaleLinear()
+                .domain([0, 1])
+                .range(["hsl(0,80%,80%)", "hsl(100,30%,40%)"])
+                .interpolate(d3.interpolateHcl);
+
             format = d3.format(",d");
             width = 500;
             height = 500;
@@ -63,14 +69,14 @@
                     .on("click", (event) => zoom(event, root));
 
                 const node = svg.append("g")
-                    .selectAll("circle")
-                    .data(root.descendants().slice(1))
-                    .join("circle")
-                    .attr("fill", d => d.children ? color(d.depth) : "white")
-                    .attr("pointer-events", d => !d.children ? "none" : null)
-                    .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
-                    .on("mouseout", function() { d3.select(this).attr("stroke", null); })
-                    .on("click", (event, d) => focus !== d && (zoom(event, d), event.stopPropagation()));
+                        .selectAll("circle")
+                        .data(root.descendants().slice(1))
+                        .join("circle")
+                        .attr("fill", d => d.children ? ((d.parent === root) ? stringToColour(d.data.name, d) : color(d.depth)) : color2(d.value))
+                        .attr("pointer-events", d => !d.children ? "none" : null)
+                        .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
+                        .on("mouseout", function() { d3.select(this).attr("stroke", null); })
+                        .on("click", (event, d) => focus !== d && (zoom(event, d), event.stopPropagation()));
 
                 const label = svg.append("g")
                     .style("font", "10px sans-serif")
@@ -81,9 +87,26 @@
                     .join("text")
                     .style("fill-opacity", d => d.parent === root ? 1 : 0)
                     .style("display", d => d.parent === root ? "inline" : "none")
-                    .text(d => d.data.name);
+                    .text(d => d.data.name + ":" + d.data.value2);
 
                 zoomTo([root.x, root.y, root.r * 2]);
+
+                function stringToColour(str, d) 
+                {
+                    console.log(d);
+                    var hash = 0;
+                    for (var i = 0; i < str.length; i++) 
+                    {
+                        hash = str.toUpperCase().charCodeAt(i) + ((hash << 5) - hash);
+                    }
+                    var colour = '#';
+                    for (var i = 0; i < 3; i++) 
+                    {
+                        var value = (hash >> (i * 8)) & 0xFF;
+                        colour += ('00' + value.toString(16)).substr(-2);
+                    }
+                    return colour;
+                }
 
                 function zoomTo(v) {
                     const k = width / v[2];
