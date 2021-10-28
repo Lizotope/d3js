@@ -33,13 +33,13 @@
             const body = d3.select('div#graph');
 
             color = d3.scaleLinear()
-                .domain([0, 5])
+                .domain([0, 2])
                 .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
                 .interpolate(d3.interpolateHcl);
             
             color2 = d3.scaleLinear()
-                .domain([0, 1])
-                .range(["hsl(0,80%,80%)", "hsl(100,30%,40%)"])
+                .domain([25, 78])
+                .range(["hsl(60,100,100)", "hsl(120,100,100)"])
                 .interpolate(d3.interpolateHcl);
 
             format = d3.format(",d");
@@ -48,7 +48,7 @@
             pack = data => d3.pack()
                 .size([width, height])
                 .padding(3)(d3.hierarchy(data)
-                .sum(d => d.value)
+                .sum(d => (!d.children ? d.value[0] : 0))
                 .sort((a, b) => b.value - a.value));
 
             datas = d3.json("/data.json", function(data) {
@@ -72,7 +72,7 @@
                         .selectAll("circle")
                         .data(root.descendants().slice(1))
                         .join("circle")
-                        .attr("fill", d => d.children ? ((d.parent === root) ? stringToColour(d.data.name, d) : color(d.depth)) : color2(d.value))
+                        .attr("fill", d => d.children ? ((d.parent === root) ? stringToColour(d.data.name, d) : color(d.depth)) : color2(d.data.value[1]*10))
                         .attr("pointer-events", d => !d.children ? "none" : null)
                         .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
                         .on("mouseout", function() { d3.select(this).attr("stroke", null); })
@@ -87,13 +87,12 @@
                     .join("text")
                     .style("fill-opacity", d => d.parent === root ? 1 : 0)
                     .style("display", d => d.parent === root ? "inline" : "none")
-                    .text(d => d.data.name + ":" + d.data.value2);
+                    .text(d => d.data.name);
 
                 zoomTo([root.x, root.y, root.r * 2]);
 
                 function stringToColour(str, d) 
                 {
-                    console.log(d);
                     var hash = 0;
                     for (var i = 0; i < str.length; i++) 
                     {
