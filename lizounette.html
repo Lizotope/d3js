@@ -34,12 +34,12 @@
 
             color = d3.scaleLinear()
                 .domain([0, 2])
-                .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
+                .range(["hsl(0,80%,80%)", "hsl(50,80%,80%)"])
                 .interpolate(d3.interpolateHcl);
             
             color2 = d3.scaleLinear()
-                .domain([25, 78])
-                .range(["hsl(60,100,100)", "hsl(120,100,100)"])
+                .domain([0, 50])
+                .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
                 .interpolate(d3.interpolateHcl);
 
             format = d3.format(",d");
